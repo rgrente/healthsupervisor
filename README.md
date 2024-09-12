@@ -155,4 +155,21 @@ hooks:
       - name: "http-probe-action"
         kind: "http"
         url: "http://example.com"
+```
 
+## Development
+
+This section covers the setup for local development of HealthSupervisor.
+
+### Prerequisites
+
+- Docker
+- Kubernetes cluster (e.g., local Kind cluster)
+- DevSpace
+- Go 1.20 or later
+
+### Development with DevSpace
+
+```bash
+devspace dev
+```
