@@ -89,3 +89,70 @@ HealthSupervisor can be deployed to Kubernetes using the provided Helm chart. Th
 
 
 
+
+## Configuration
+
+HealthSupervisor is highly configurable through a YAML file. Here's an overview of the main configuration sections:
+
+### Probes
+
+Probes are used to check the health of individual services or components. Each probe has the following properties:
+
+- `name`: A unique identifier for the probe
+- `kind`: The type of probe (e.g., "http", "remoteSupervisor")
+- `target`: The URL or endpoint to check
+- `interval`: How often to run the probe (in seconds)
+- `weight`: The importance of this probe in the overall health calculation (optional)
+- `expectedStatusCode`: For HTTP probes, the expected HTTP status code (optional)
+
+Example:
+```yaml
+probes:
+  - name: "http-probe"
+    kind: "http"
+    target: "http://example.com"
+    interval: 30
+    weight: 1
+    expectedStatusCode: 200
+```
+
+
+### Rules
+
+Rules define how the results of probes are evaluated to determine the overall health status. Each rule has:
+
+- `name`: A unique identifier for the rule
+- `kind`: The type of rule (e.g., "healthy", "remoteSupervisorEvaluation")
+- `probes`: An array of probe names this rule applies to
+- `ifnot`: Conditions that, if not met, trigger the rule
+
+Example:
+```yaml
+rules:
+  - name: "http-probe-rule"
+    kind: "healthy"
+    probes: ["http-probe"]
+    ifnot:
+      - http-probe: false
+```
+
+
+### Hooks
+
+Hooks allow you to define actions that should be taken based on certain conditions. Each hook has:
+
+- `name`: A unique identifier for the hook
+- `conditions`: The conditions that trigger the hook
+- `actions`: The actions to perform when the conditions are met
+
+Example:
+```yaml
+hooks:
+  - name: "http-probe-hook"
+    conditions:
+      - http-probe: false
+    actions:
+      - name: "http-probe-action"
+        kind: "http"
+        url: "http://example.com"
+
