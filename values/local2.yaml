@@ -1,0 +1,47 @@
+image:
+  repository: docker.io/library/healthsupervisor
+  tag: dev-YXHkKZ
+
+ingressroute:
+  host: remote-healthsupervisor.127.0.0.1.nip.io
+  svc: remote-healthsupervisor-chart
+
+volumes:
+- name: config
+  configMap:
+    name: remote-healthsupervisor-chart-config
+
+configMapData: 
+  config.yaml: |-
+    remoteSupervisors:
+      - name: "myremote"
+        url: "http://healthsupervisor-chart/health"
+        interval: 5
+        wantStatus: "UP"
+
+    probes:
+      - name: "keycloak"
+        kind: "http"
+        target: "http://local-keycloak:80/realms/master"
+        expectedStatusCode: 200
+        interval: 5
+        weight: 10
+      - name: "api"
+        kind: "http"
+        target: "http://local-frontend:8081/v2/health"
+        expectedStatusCode: 200
+        interval: 5
+        weight: 5
+      - name: "grafana"
+        kind: "http"
+        target: "http://local-grafana:3000/admin/dashboards"
+        expectedStatusCode: 200
+        interval: 5
+        weight: 100
+
+    rules:
+      - name: "availability"
+        kind: availability
+        probes: ["grafana"]
+
+    hooks:

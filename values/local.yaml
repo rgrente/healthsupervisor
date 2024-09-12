@@ -1,0 +1,55 @@
+image:
+  repository: docker.io/library/healthsupervisor
+  tag: latest
+
+ingressroute:
+  host: healthsupervisor.127.0.0.1.nip.io
+  svc: healthsupervisor-chart
+
+volumes:
+- name: config
+  configMap:
+    name: healthsupervisor-chart-config
+
+configMapData: 
+  config.yaml: |-
+    probes:
+      - name: "remote-supervisor"
+        kind: "remoteSupervisor"
+        target: "http://remote-healthsupervisor-chart/health"
+        interval: 5
+      - name: "keycloak"
+        kind: "http"
+        target: "http://local-keycloak:80/realms/master"
+        expectedStatusCode: 200
+        interval: 5
+        weight: 10
+      - name: "api"
+        kind: "http"
+        target: "http://local-frontend:8081/v2/health"
+        expectedStatusCode: 200
+        interval: 5
+        weight: 5
+
+    rules:
+      - name: "remote-supervisor-availability"
+        kind: remoteSupervisorEvaluation
+        probes: ["remote-supervisor"]
+        ifnot:
+          - supervisorHealthy: true
+      - name: "keycloak-availability"
+        kind: healthy
+        probes: ["keycloak"]
+        ifnot:
+          - supervisorHealthy: false
+        
+    hooks:
+      - name: "supervisor-turn-up"
+        conditions:
+          - supervisorHealthy: true
+        actions:
+          - name: "clean-cache"
+            kind: "http"
+            url: "http://local-keto-read"
+            method: "GET"
+            expectedStatusCode: 200

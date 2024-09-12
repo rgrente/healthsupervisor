@@ -1,0 +1,55 @@
+version: v2beta1
+
+images:
+  healthsupervisor:
+    image: docker.io/library/healthsupervisor 
+    dockerfile: ./Dockerfile
+    tags:
+      - dev-${DEVSPACE_RANDOM}
+    # docker:
+    #   args:
+    #     - "--no-cache"
+
+dev:
+  healthsupervisor:
+    # imageSelector: docker.io/library/healthsupervisor
+    labelSelector:
+      app.kubernetes.io/name: chart
+      app.kubernetes.io/instance: healthsupervisor
+    devImage: ext-dockerio.artifactory.si.francetelecom.fr/golang:1.23-alpine
+    namespace: local-multipass
+    container: chart
+    workingDir: /app/src
+    command: ["go", "run", "main.go"]
+    sync:
+      - path: ./src/:/app/src
+        onUpload:
+          restartContainer: true
+    logs:
+      lastLines: 100
+       
+deployments:
+  healthsupervisor:
+    updateImageTags: false
+    namespace: local-multipass
+    helm:
+      disableDependencyUpdate: true
+      chart:
+        name: ./chart
+      values:
+        image:
+          tag: dev-${DEVSPACE_RANDOM}
+        # securityContext:
+        #   runAsNonRoot: false
+        #   runAsUser: 0
+        # resources:
+        #   limits:
+        #     cpu: 500m
+        #     memory: 1000Mi
+        #   requests:
+        #     cpu: 500m
+        #     memory: 256Mi
+      valuesFiles:
+      - values/local.yaml
+      # upgradeArgs:
+      # - --wait

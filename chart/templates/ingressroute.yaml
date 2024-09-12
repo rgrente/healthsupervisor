@@ -1,0 +1,17 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "chart.fullname" . }}-ingressroute
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - kind: Rule
+    match: ( Host(`{{ .Values.ingressroute.host }}`) ) && ( PathPrefix(`/health`) )
+    services:
+    - name: {{ .Values.ingressroute.svc }}
+      port: 80
+  tls:
+    secretName: multipass-tls
