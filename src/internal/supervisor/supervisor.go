@@ -7,25 +7,25 @@ import (
 )
 
 type Supervisor struct {
-	Name            string
-	Healthy         bool
-	previousHealthy bool
-	Level           int
-	Interval        int
-	Prober          *prober.Prober
-	Rules           []*rules.Rule
-	Hooks           []*hooks.Hook
+	Name             string
+	StatusOK         bool
+	previousStatusOK bool
+	Level            int
+	Interval         int
+	Prober           *prober.Prober
+	Rules            []*rules.Rule
+	Hooks            []*hooks.Hook
 }
 
 func NewSupervisor(name string, interval int, remoteSupervisors []map[string]interface{}, prober *prober.Prober, rules []*rules.Rule, hooksConfig []map[string]interface{}) (*Supervisor, error) {
 	supervisor := &Supervisor{
-		Name:            name,
-		Healthy:         false,
-		previousHealthy: false,
-		Level:           0,
-		Interval:        interval,
-		Prober:          prober,
-		Rules:           rules,
+		Name:             name,
+		StatusOK:         false,
+		previousStatusOK: false,
+		Level:            0,
+		Interval:         interval,
+		Prober:           prober,
+		Rules:            rules,
 	}
 
 	for _, hook := range hooksConfig {

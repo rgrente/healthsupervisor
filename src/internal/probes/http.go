@@ -11,7 +11,8 @@ import (
 
 type httpProbe struct {
 	genericProbe
-	httpClient http.Client
+	ExpectedStatusCode int
+	httpClient         http.Client
 }
 
 func NewHTTPProbe(data map[string]interface{}) (*httpProbe, error) {
@@ -22,30 +23,31 @@ func NewHTTPProbe(data map[string]interface{}) (*httpProbe, error) {
 	}
 
 	p := &httpProbe{
-		genericProbe: gp,
-		httpClient:   http.Client{},
+		genericProbe:       gp,
+		ExpectedStatusCode: data["expectedStatusCode"].(int),
+		httpClient:         http.Client{},
 	}
 	return p, nil
 }
 
 func (p *httpProbe) Run() {
-	previousHealth := p.Healthy
+	previousHealth := p.StatusOK
 	p.lastPoll = time.Now()
 
 	r, err := p.httpClient.Get(p.Target)
 	if err != nil {
-		p.Healthy = false
+		p.StatusOK = false
 		p.Message = err.Error()
 	} else if r.StatusCode != p.ExpectedStatusCode {
-		p.Healthy = false
+		p.StatusOK = false
 		p.Message = fmt.Sprintf("unexpected status code: got %d, want %d", r.StatusCode, p.ExpectedStatusCode)
 	} else {
-		p.Healthy = true
+		p.StatusOK = true
 		p.Message = "OK"
 	}
 
-	if p.Healthy != previousHealth && p.statusChangeChannel != nil {
-		log.Println("Probe", p.GetName(), "health changed to", p.Healthy)
+	if p.StatusOK != previousHealth && p.statusChangeChannel != nil {
+		log.Println("Probe", p.GetName(), "status changed to", p.StatusOK)
 		p.statusChangeChannel <- p
 	}
 }

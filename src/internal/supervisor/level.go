@@ -5,7 +5,7 @@ package supervisor
 func (s *Supervisor) evaluateLevel() {
 	s.Level = 0
 	for _, probe := range s.Prober.GetProbes() {
-		if probe.GetProbeStatus().Healthy {
+		if probe.GetProbeStatus().StatusOK {
 			s.Level += probe.GetProbeWeight()
 		}
 	}

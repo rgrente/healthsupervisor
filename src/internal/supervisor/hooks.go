@@ -16,7 +16,7 @@ func (s *Supervisor) checkAndExecuteHooks() {
 
 func (s *Supervisor) hookConditionsMet(hook *hooks.Hook) bool {
 	for _, condition := range hook.Conditions {
-		if condition.SupervisorHealthy == s.Healthy && s.Healthy != s.previousHealthy {
+		if condition.SupervisorHealthy == s.StatusOK && s.StatusOK != s.previousStatusOK {
 			return true
 		}
 		// Add more condition checks as needed

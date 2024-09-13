@@ -1,5 +1,7 @@
 # HealthSupervisor
 
+**DISCLAIMER: This project is currently in active development and is not yet ready for production use. Features, APIs, and documentation are subject to change.**
+
 HealthSupervisor is a robust health monitoring and aggregation system designed to supervise and report on the overall health status of complex, distributed systems. It aggregates health information from various services, components, and even other HealthSupervisor instances to provide a comprehensive view of your system's status.
 
 ## Overview

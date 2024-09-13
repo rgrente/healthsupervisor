@@ -8,8 +8,8 @@ import (
 // Function to evaluate rules
 // This function is used to evaluate the rules of the local supervisor
 func (s *Supervisor) evaluateRules() {
-	s.previousHealthy = s.Healthy
-	s.Healthy = true
+	s.previousStatusOK = s.StatusOK
+	s.StatusOK = true
 
 	for _, rule := range s.Rules {
 		switch rule.Kind {
@@ -19,8 +19,8 @@ func (s *Supervisor) evaluateRules() {
 			s.evaluateRemoteSupervisorRule(rule)
 		}
 	}
-	if s.Healthy != s.previousHealthy {
-		log.Println("Supervisor health changed to", s.Healthy)
+	if s.StatusOK != s.previousStatusOK {
+		log.Println("Supervisor status changed to", s.StatusOK)
 	}
 }
 
@@ -33,10 +33,10 @@ func (s *Supervisor) evaluateHealthyRule(rule *rules.Rule) {
 			// Log an error or handle the case where the probe is not found
 			continue
 		}
-		if !probe.GetProbeStatus().Healthy {
+		if !probe.GetProbeStatus().StatusOK {
 			for _, ifNot := range rule.IfNot {
 				if !*ifNot.SupervisorHealthy {
-					s.Healthy = false
+					s.StatusOK = false
 				}
 			}
 			return
@@ -53,9 +53,9 @@ func (s *Supervisor) evaluateRemoteSupervisorRule(rule *rules.Rule) {
 			// Log an error or handle the case where the probe is not found
 			continue
 		}
-		if probe.GetProbeStatus().Healthy {
+		if probe.GetProbeStatus().StatusOK {
 			if probe.GetProbeStatus().Level > s.Level {
-				s.Healthy = false
+				s.StatusOK = false
 			}
 		}
 	}

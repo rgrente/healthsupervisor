@@ -22,7 +22,7 @@ func NewProber(configuredProbes []map[string]interface{}) *Prober {
 			continue
 		}
 		probe.SetStatusChangeChannel(prober.statusChanges) // Set the status change channel
-		log.Println("Configure probe", probe.GetName())
+		log.Printf("Configure %s probe %s", probe.GetProbeKind(), probe.GetName())
 		prober.probes = append(prober.probes, probe)
 	}
 	return prober

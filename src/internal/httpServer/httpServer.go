@@ -36,7 +36,7 @@ func HealthHandler(w http.ResponseWriter, r *http.Request, supervisor *superviso
 		probeStates[i] = probeRender{
 			Name: probe.GetName(),
 			Status: statusRender{
-				Healthy: probe.GetProbeStatus().Healthy,
+				Healthy: probe.GetProbeStatus().StatusOK,
 				Message: probe.GetProbeStatus().Message,
 			},
 			LastPoll: lastPoll,
@@ -44,7 +44,7 @@ func HealthHandler(w http.ResponseWriter, r *http.Request, supervisor *superviso
 	}
 
 	var supervisorStatus string
-	if supervisor.Healthy {
+	if supervisor.StatusOK {
 		supervisorStatus = "UP"
 	} else {
 		supervisorStatus = "DOWN"

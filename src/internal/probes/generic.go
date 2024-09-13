@@ -12,31 +12,29 @@ type Probe interface {
 	Run()
 	GetProbeStatus() ProbeStatus
 	GetProbeWeight() int
+	GetProbeKind() string
 	GetName() string
 	GetInterval() int
 	GetLastPoll() time.Time
-	IsMandatory() bool
 	SetStatusChangeChannel(chan<- Probe)
 }
 
 type genericProbe struct {
-	Name               string "yaml:\"name\""
-	Target             string "yaml:\"target\""
-	Kind               string "yaml:\"kind\""
-	ExpectedStatusCode int    "yaml:\"expectedStatusCode\""
-	Weight             int    "yaml:\"weight\""
-	Interval           int    "yaml:\"interval\""
-	Mandatory          bool   "yaml:\"mandatory\""
-	lastPoll           time.Time
+	Name      string "yaml:\"name\""
+	Target    string "yaml:\"target\""
+	Kind      string "yaml:\"kind\""
+	Weight    int    "yaml:\"weight\""
+	Interval  int    "yaml:\"interval\""
+	Mandatory bool   "yaml:\"mandatory\""
+	lastPoll  time.Time
 	ProbeStatus
 	statusChangeChannel chan<- Probe
 }
 
 type ProbeStatus struct {
-	Healthy         bool
-	PreviousHealthy bool
-	Message         string
-	Level           int
+	StatusOK bool
+	Message  string
+	Level    int
 }
 
 func NewGenericProbe(data map[string]interface{}) (*genericProbe, error) {
@@ -68,8 +66,8 @@ func (p *genericProbe) GetProbeWeight() int {
 	return p.Weight
 }
 
-func (p *genericProbe) IsMandatory() bool {
-	return p.Mandatory
+func (p *genericProbe) GetProbeKind() string {
+	return p.Kind
 }
 
 func (p *genericProbe) SetStatusChangeChannel(ch chan<- Probe) {
@@ -88,6 +86,8 @@ func NewProbeFromConfig(data map[string]interface{}) (Probe, error) {
 		return NewHTTPProbe(data)
 	case "remoteSupervisor":
 		return NewRemoteSupervisor(data)
+	case "dns":
+		return NewDNSProbe(data)
 	// Add cases for other probe types here
 	default:
 		return nil, fmt.Errorf("unknown probe kind: %s", genericProbe.Kind)
